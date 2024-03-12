@@ -1,0 +1,47 @@
+<?php
+// Configuración de la conexión a la base de datos
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "registro_ortodoncia";
+
+try {
+    // Crear la conexión
+    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+    // Configurar el modo de error a excepción
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Consultar el total de registros
+    $sql_total = "SELECT COUNT(*) as total FROM tratamiento_fijo";
+    $stmt_total = $conn->prepare($sql_total);
+    $stmt_total->execute();
+    $total_registros = $stmt_total->fetch(PDO::FETCH_ASSOC);
+    $total_registros = $total_registros['total'];
+    echo "<p>Total de registros: $total_registros</p>";
+
+    // Consulta para obtener el número de registros por médico
+    $sql_medicos = "SELECT medico, COUNT(*) as cantidad FROM tratamiento_fijo GROUP BY medico";
+    $stmt_medicos = $conn->prepare($sql_medicos);
+    $stmt_medicos->execute();
+    $registros_medicos = $stmt_medicos->fetchAll(PDO::FETCH_ASSOC);
+    echo "<p>Registros por médico:</p>";
+    echo "<ul>";
+    foreach ($registros_medicos as $registro) {
+        echo "<li>{$registro['medico']}: {$registro['cantidad']}</li>";
+    }
+    echo "</ul>";
+
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
+?>
+
+<!-- Formulario para el buscador por médico -->
+<form action="lista_tf.php" method="GET">
+    <div class="form-group">
+        <label for="medico">Búsqueda por Médico:</label>
+        <input type="text" class="form-control" id="medico" name="medico">
+    </div>
+    <!-- Botón de búsqueda para médico -->
+    <button type="submit" class="btn btn-primary" name="buscar_medico">Buscar por Médico</button>
+</form>
